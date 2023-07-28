@@ -1,6 +1,8 @@
-const User = require("./../../models/userModel");
+const User = require("./../../models/user");
+
 
 const myProfile = async (req, res, next) => {
+  
   try {
     const user = await User.findOne({
       where: req.user.id,

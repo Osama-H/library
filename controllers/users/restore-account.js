@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const User = require("./../../models/userModel");
+const User = require("./../../models/user");
 const AppError = require("./../utils/appError");
 
 const restoreAccount = async (req, res, next) => {

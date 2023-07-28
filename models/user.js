@@ -1,7 +1,8 @@
 const { DataTypes } = require("sequelize");
-const db = require("./../db/connectDb");
+const db = require("./../config/database");
 
-const Book = require("./../models/bookModel");
+const Book = require("./book");
+const Address = require("./address");
 
 const User = db.define(
   "User",
@@ -24,6 +25,7 @@ const User = db.define(
         },
       },
     },
+    x: DataTypes.STRING,
     nationality: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -31,6 +33,9 @@ const User = db.define(
     role: {
       type: DataTypes.STRING,
       defaultValue: "user",
+    },
+    photo: {
+      type: DataTypes.STRING,
     },
   },
   {
@@ -47,13 +52,20 @@ User.hasMany(Book, {
 });
 Book.belongsTo(User, { onDelete: "SET NULL", onUpdate: "CASCADE" });
 
+// User.hasOne(Address, {
+//   foreignKey: {
+//     allowNull: false,
+//   },
+// });
+// Address.belongsTo(User);
+
 module.exports = User;
 
-(async () => {
-  try {
-    await db.sync();
-    console.log(`DataBase Synced Sucessfully`);
-  } catch (err) {
-    console.log(`Error In DB ${err}`);
-  }
-})();
+// (async () => {
+//   try {
+//     await db.sync({alter : true});
+//     console.log(`DataBase Synced Sucessfully`);
+//   } catch (err) {
+//     console.log(`Error In DB ${err}`);
+//   }
+// })();

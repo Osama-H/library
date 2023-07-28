@@ -1,4 +1,4 @@
-const User = require("./../../models/userModel");
+const User = require("./../../models/user");
 
 const deleteMyAccount = async (req, res, next) => {
   try {
@@ -8,14 +8,7 @@ const deleteMyAccount = async (req, res, next) => {
       data: null,
     });
   } catch (err) {
-    let statusCode;
-    if (err instanceof AppError) {
-      statusCode = err.statusCode;
-    } else {
-      statusCode = 400;
-    }
-
-    res.status(statusCode).json({
+    res.status(400).json({
       status: "fail",
       err: err.message,
     });

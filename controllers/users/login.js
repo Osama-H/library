@@ -1,13 +1,19 @@
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const User = require("./../../models/userModel");
+const User = require("./../../models/user");
 const AppError = require("../utils/appError");
 const generateToken = require("./utils/generateToken");
+const loginInSchema = require("./utils/login-schema");
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
+    const isValid = await loginInSchema.validateAsync(req.body);
+
+    // if (!isValid) {
+    //   throw new Error("VALIDATION_ERROR");
+    // }
+
     const user = await User.findOne({
       where: {
         email,

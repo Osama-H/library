@@ -12,6 +12,7 @@ const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
     idle: 20000,
     evict: 10000,
   },
+  logging: false,
 });
 
 /* 
@@ -21,6 +22,17 @@ const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
     paranoid: true,
   }
 */
+
+if (process.env.NODE_ENV == "development") {
+  (async () => {
+    try {
+      await sequelize.sync({ alter: true });
+      console.log(`DataBase Synced Sucessfully`);
+    } catch (err) {
+      console.log(`Error In DB ${err}`);
+    }
+  })();
+}
 
 (async () => {
   try {

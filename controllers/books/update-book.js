@@ -1,35 +1,21 @@
-const Book = require("./../../models/bookModel");
+const Book = require("../../models/book");
 const AppError = require("../utils/appError");
+
+const createBookSchema = require("./utils/update-book-schema");
 
 const updateBook = async (req, res, next) => {
   const { bookId } = req.params;
 
-  const { name, numOfPages, category, review } = req.body;
-  let updates = {};
-
-  if (name) {
-    updates.name = name;
-  }
-
-  if (numOfPages) {
-    updates.numOfPages = numOfPages;
-  }
-
-  if (category) {
-    updates.category = category;
-  }
-
-  if (review) {
-    updates.review = review;
-  }
-
   try {
+    const result = await createBookSchema.validateAsync(req.body);
+
     const findBook = await Book.findByPk(bookId);
     if (!findBook) {
       throw new AppError("Book Not Found", 404);
     }
 
-    await Book.update(updates, { where: { id: bookId } });
+    await Book.update(result, { where: { id: bookId } });
+
     res.json({
       status: "Success",
       message: "Book Updated Successully",
@@ -38,6 +24,8 @@ const updateBook = async (req, res, next) => {
     let statusCode;
     if (err instanceof AppError) {
       statusCode = err.statusCode;
+    } else if (err.isJoi) {
+      statusCode = 422;
     } else {
       statusCode = 400;
     }

@@ -1,10 +1,14 @@
 // const app = require('express')()
 const express = require("express");
 const router = require("./router");
+require("./config/database");
+
 const app = express();
-require("./db/connectDb");
 
 app.use(express.json());
+
+console.log(process.env.NODE_ENV);
+
 app.use("/api/v1", router);
 
 const port = process.env.PORT || 5000;

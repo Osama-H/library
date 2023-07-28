@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require('../../../models/userModel');
+const User = require("../models/user");
 
 const protect = async (req, res, next) => {
   let token;
@@ -11,9 +11,7 @@ const protect = async (req, res, next) => {
     const decodedPayload = jwt.verify(token, process.env.TOKEN_KEY);
 
     const foundUser = await User.findByPk(decodedPayload.id);
-
     req.user = foundUser;
-
     next();
   } catch (err) {
     res.send(err.message);

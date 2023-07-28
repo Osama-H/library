@@ -1,19 +1,84 @@
-const User = require("./../../models/userModel");
+const upload = require("express-fileupload");
+const sharp = require("sharp");
 
-const updateAccount = async (req, res, next) => {
-  const { username, nationality } = req.body;
-  let finalObject = {};
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
 
-  if (username) {
-    finalObject.username = username;
+const User = require("./../../models/user");
+
+const updateAccSchema = require("./utils/update-acc-schema");
+
+exports.fileUpload = upload({ createParentPath: true });
+
+exports.filterFiles = (req, res, next) => {
+  if (!req.files) {
+    next();
+  }
+  console.log(req.files);
+
+  const fileType = req.files.photo.mimetype.split("/")[0];
+  if (fileType == "image") {
+    next();
+  } else {
+    throw new Error("U can upload Only images");
+  }
+};
+
+exports.resizePhoto = async (req, res, next) => {
+  if (!req.files.photo) {
+    next();
   }
 
-  if (nationality) {
-    finalObject.nationality = nationality;
-  }
+  // const buffer = req.files.photo.data;
+
+  // const newPhoto = await sharp(buffer).resize(500, 500).toBuffer();
+  // req.files.photo.data = newPhoto;
+  next();
+};
+
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.ACCESS_KEY;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: accessKey,
+    secretAccessKey: secretAccessKey,
+  },
+  region: bucketRegion,
+});
+
+exports.updateAccount = async (req, res, next) => {
+  // console.log(req.files);
+
+  let params = {};
 
   try {
-    await User.update(finalObject, {
+    const result = await updateAccSchema.validateAsync(req.body);
+
+    // console.log(req.files.photo.data);
+
+    if (req.files.photo) {
+      result.photo = `user-${req.user.id}-${Date.now()}`;
+      params = {
+        Bucket: bucketName,
+        Key: result.photo,
+        Body: req.files.photo.data,
+        ContentType: req.files.photo.mimetype,
+      };
+
+      const command = new PutObjectCommand(params);
+      await s3.send(command);
+    }
+
+    
+
+    await User.update(result, {
       where: {
         id: req.user.id,
       },
@@ -24,8 +89,8 @@ const updateAccount = async (req, res, next) => {
     });
   } catch (err) {
     let statusCode;
-    if (err instanceof AppError) {
-      statusCode = err.statusCode;
+    if (err.isJoi) {
+      statusCode = 422;
     } else {
       statusCode = 400;
     }
@@ -36,5 +101,3 @@ const updateAccount = async (req, res, next) => {
     });
   }
 };
-
-module.exports = updateAccount;

@@ -1,4 +1,4 @@
-const Book = require("./../../models/bookModel");
+const Book = require("../../models/book");
 const AppError = require("../utils/appError");
 
 const deleteBook = async (req, res, next) => {
@@ -18,14 +18,7 @@ const deleteBook = async (req, res, next) => {
       data: null,
     });
   } catch (err) {
-    let statusCode;
-    if (err instanceof AppError) {
-      statusCode = err.statusCode;
-    } else {
-      statusCode = 400;
-    }
-
-    res.status(statusCode).json({
+    res.status(400).json({
       status: "fail",
       err: err.message,
     });
